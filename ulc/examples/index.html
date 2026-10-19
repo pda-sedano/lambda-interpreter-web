@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ulc example</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; }
+    textarea, input { font: inherit; font-family: ui-monospace, monospace; }
+    textarea { width: 100%; box-sizing: border-box; }
+    pre { background: #f4f4f4; padding: 0.75rem; overflow-x: auto; white-space: pre-wrap; }
+    .error { color: #b00020; }
+  </style>
+</head>
+<body>
+  <!-- Minimal example of loading the package. Serve the ulc/ folder over HTTP
+       (e.g. `python3 -m http.server` inside ulc/) and open /examples/. -->
+  <h1>Untyped lambda calculus</h1>
+  <label for="src">Expression (type <code>\</code> for λ)</label>
+  <textarea id="src" rows="3">λm n f x.(m f (n f x)) λf x.(f (f (f x))) λf x.(f (f x))</textarea>
+  <p>
+    <label>Max steps <input id="max" type="number" min="0" placeholder="no limit" size="8"></label>
+    <label><input id="all" type="checkbox" checked> Show every step</label>
+    <button id="go">Run</button>
+  </p>
+  <pre id="out" aria-live="polite"></pre>
+
+  <script type="module">
+    import init, { run } from "../pkg/ulc.js";
+
+    await init();
+
+    const $ = (id) => document.getElementById(id);
+    $("src").addEventListener("input", (e) => {
+      const t = e.target, pos = t.selectionStart;
+      if (t.value.includes("\\")) {
+        t.value = t.value.replaceAll("\\", "λ");
+        t.setSelectionRange(pos, pos);
+      }
+    });
+
+    $("go").addEventListener("click", () => {
+      const out = $("out");
+      out.classList.remove("error");
+      try {
+        const max = $("max").value;
+        const r = run($("src").value, {
+          outputAll: $("all").checked,
+          maxSteps: max === "" ? undefined : Number(max),
+          timeoutMs: 1000,
+        });
+        out.textContent = r.steps.join("\n") + `\n\n${r.stepCount} steps, status: ${r.status}`;
+      } catch (e) {
+        out.classList.add("error");
+        out.textContent = e.message;
+      }
+    });
+  </script>
+</body>
+</html>

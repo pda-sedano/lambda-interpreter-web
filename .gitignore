@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.fseventsd
+Icon?
+
+# Windows (in case the repo is ever opened there)
+Thumbs.db
+Desktop.ini
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+.claude/settings.local.json
+
+# Rust build output (ulc/.gitignore also covers ulc/target)
+target/
+**/*.rs.bk
+
+# Node (only node:test is used today; this is for later tooling)
+node_modules/
+npm-debug.log*
+
+# Vercel CLI project link (created by `vercel link` / `vercel dev`)
+.vercel/
+
+# Secrets — this static site has none; never commit them if added
+.env
+.env.*
+
+# NOTE: ulc/pkg/ is committed on purpose so Vercel needs no Rust toolchain.
+# Do not add pkg/ here, and delete pkg/.gitignore after each wasm-pack build.

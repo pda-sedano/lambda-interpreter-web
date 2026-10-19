@@ -1,0 +1,20 @@
+{
+  "name": "ulc",
+  "type": "module",
+  "description": "Untyped lambda calculus interpreter (normal-order reduction, de Bruijn indices) with WebAssembly bindings",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pda-sedano/lambda-interpreter-web"
+  },
+  "files": [
+    "ulc_bg.wasm",
+    "ulc.js",
+    "ulc.d.ts"
+  ],
+  "main": "ulc.js",
+  "types": "ulc.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

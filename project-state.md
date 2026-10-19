@@ -1,0 +1,21 @@
+# Project state — Lambda Interpreter Demo
+
+- **Current project, folder, and saved version:** Lambda Interpreter Demo, `lambda-interpreter-web/`. Not under git yet (no `.git` in the folder); nothing committed, pushed, or deployed.
+- **Brief/rules and current stage:** `project-brief.md` written 2026-10-19 (updated with Perrin's answers and LinkedIn URL). Stage: brief, `project-scope.md`, and `project-plan.md` (2026-10-19) done; build increment 1 next. The interpreter is packaged as a WebAssembly library (`ulc/`); no website pages yet.
+- **Completed outcome and files changed (2026-10-19):** Added `ulc/`, a Rust crate made from BusyReaper `src/ulc` (commit `c71450b`) with a JavaScript API (`run`, `parse`, `Evaluator`, `maxDepth`). Prebuilt package in `ulc/pkg/`. Minimal demo page at `ulc/examples/index.html`. Usage and build steps in `ulc/README.md`. BusyReaper itself was not modified.
+- **Checks performed and observations:**
+  - 2026-10-19 ~14:10: Perrin rebuilt `pkg/` on the Mac with wasm-pack and reports that `cargo test` and the JS tests all passed.
+  - `cargo test`: 81 passed (67 original + 14 new).
+  - `node --test ulc/js-tests/*.test.mjs` on the built package: 18 passed. Includes the old HTTP server's 3+2 traces, which match exactly.
+  - Headless Chromium (Linux) via a local server:
+    - The example page runs 3+2 in 6 steps and shows syntax errors in red.
+    - The page lays out correctly at 375 px wide.
+    - Over-deep terms stop with a clean error or `"too_deep"`, and the module keeps working afterward.
+    - Ω times out on schedule at about 1M steps/s.
+    - The package runs inside a module Web Worker.
+- **Failures and Not tested items:**
+  - Not tested in Firefox or Safari, or on a real phone.
+  - Not tested on Vercel.
+- **Publication status and actual URL, if any:** Not published.
+- **Pending owner decision or blocker:** None. (Optional bio line later.) Do not mention BusyReaper on the web page (repo mentions are fine). Root `.gitignore` added 2026-10-19; git not initialized yet.
+- **Next single action and how to verify it:** Build increment 1 (`index.html` with content and the existing interpreter). Verify at http://localhost:8000/: content matches the brief, and 3 + 2 → `λf x.(f (f (f (f (f x)))))` in 6 steps.
