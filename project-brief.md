@@ -41,13 +41,13 @@ From `AGENTS.md`, `project-state.md`, `ulc/README.md`, and the files in `ulc/`:
 - First version: **one page, three main sections.** Proposed: the interpreter, how it works and its syntax, and about Perrin (GitHub, LinkedIn, View source). Scoping confirms this.
 - The site is static HTML/CSS/JS plus the committed `ulc/pkg/` files, deployed to a personal (noncommercial) Vercel project.
 - WebAssembly will not load from a `file://` address, so local checks use `python3 -m http.server` instead of double-clicking `index.html`. This differs from the course's default "open the file directly" check.
-- Long runs stay bounded (default 1000 ms timeout, or a Web Worker), so the page never freezes.
+- Long runs stay bounded by the 1000 ms timeout: the page may freeze for up to about 1.5 s, then accepts input. A Web Worker (no freeze) is a later option.
 
 ## Observable success statements
 
 1. A first-time visitor can say what the page does and who built it within about 30 seconds.
 2. **Try the interpreter** brings the input into view. Running the preloaded 3 + 2 example shows `λf x.(f (f (f (f (f x)))))` and 6 steps.
 3. Invalid syntax shows the interpreter's error message, and the next valid Run still works.
-4. Ω (`λx.(x x) λx.(x x)`) stops with a visible timeout status, and the page stays responsive.
+4. Ω (`λx.(x x) λx.(x x)`) stops with a visible timeout status after a freeze of no more than about 1.5 s, and the page then accepts input.
 5. At phone width the page is readable, and Run can be reached and activated with Tab plus Enter.
 6. Every link opens its intended destination.

@@ -1,6 +1,6 @@
 # Project state — Lambda Interpreter Demo
 
-- **Current project, folder, and saved version:** Lambda Interpreter Demo, `lambda-interpreter-web/`. Not under git yet (no `.git` in the folder); nothing committed, pushed, or deployed.
+- **Current project, folder, and saved version:** Lambda Interpreter Demo, `lambda-interpreter-web/`. Local git: baseline commit `b583568` ("Initial commit."). Nothing pushed or deployed.
 - **Brief/rules and current stage:** `project-brief.md` written 2026-10-19 (updated with Perrin's answers and LinkedIn URL). Stage: brief, `project-scope.md`, and `project-plan.md` (2026-10-19) done; build increment 1 next. The interpreter is packaged as a WebAssembly library (`ulc/`); no website pages yet.
 - **Completed outcome and files changed (2026-10-19):** Added `ulc/`, a Rust crate made from BusyReaper `src/ulc` (commit `c71450b`) with a JavaScript API (`run`, `parse`, `Evaluator`, `maxDepth`). Prebuilt package in `ulc/pkg/`. Minimal demo page at `ulc/examples/index.html`. Usage and build steps in `ulc/README.md`. BusyReaper itself was not modified.
 - **Checks performed and observations:**
@@ -17,5 +17,5 @@
   - Not tested in Firefox or Safari, or on a real phone.
   - Not tested on Vercel.
 - **Publication status and actual URL, if any:** Not published.
-- **Pending owner decision or blocker:** None. (Optional bio line later.) Do not mention BusyReaper on the web page (repo mentions are fine). Root `.gitignore` added 2026-10-19; git not initialized yet.
-- **Next single action and how to verify it:** Build increment 1 (`index.html` with content and the existing interpreter). Verify at http://localhost:8000/: content matches the brief, and 3 + 2 → `λf x.(f (f (f (f (f x)))))` in 6 steps.
+- **Pending owner decision or blocker:** None. (Optional bio line later.) Do not mention BusyReaper on the web page (repo mentions are fine). Root `.gitignore` added 2026-10-19.
+- **Next single action and how to verify it:** Perrin runs `sh ulc/build.sh` on the Mac (rebuilds `ulc/pkg/` with home-folder paths remapped to `~`; the script fails if any remain), reruns `cargo test` and `node --test js-tests/*.test.mjs` in `ulc/`, and commits. Then build increment 1 per `project-plan.md`.

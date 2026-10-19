@@ -31,9 +31,10 @@ cargo install wasm-pack
 Build (from `ulc/`):
 
 ```sh
-wasm-pack build --release --target web
-rm pkg/.gitignore    # wasm-pack writes a "*" .gitignore that would keep pkg/ out of git
+sh build.sh
 ```
+
+`build.sh` runs `wasm-pack build --release --target web` with `RUSTFLAGS="--remap-path-prefix=$HOME=~"` so the `.wasm` doesn't embed your home-folder paths, deletes the `pkg/.gitignore` that wasm-pack writes (its `*` would keep `pkg/` out of git), and fails if any home-folder path is still in `pkg/`.
 
 `--target web` gives a plain ES module that works in a `<script type="module">` with no bundler. If the site later moves to a bundler (Vite, webpack), `--target web` still works with Vite; use `--target bundler` for webpack.
 

@@ -10,7 +10,7 @@
 
 One page with a heading and three main sections:
 
-1. **Try it:** the interpreter, with an expression box, Run, a "show every step" toggle, an optional max-steps field, and the output (steps, step count, stop status).
+1. **Try it:** the interpreter, with an expression box, Run, a "show every step" toggle, an optional max-steps field (empty or a whole number ≥ 0), a one-line status (step count and stop status, or the error), and the step trace.
 2. **How it works:** a few plain sentences on normal-order reduction and de Bruijn indices, plus a compact syntax reference (`λx.M`, `λx y.M`, application, `x^n`, `\` types `λ`, a `λ` body is a single term) and the limits (depth 1000, 1-second timeout).
 3. **About:** "Built by Perrin Alaine-Sedano", plus links to GitHub (https://github.com/pda-sedano), LinkedIn (https://www.linkedin.com/in/perrin-alaine-sedano-4589b31b5/), and View source (this repo).
 
@@ -23,10 +23,10 @@ One page with a heading and three main sections:
 | The three sections above and the Try the interpreter button | Link to Perrin's main personal website (once it's ready) | Mentioning BusyReaper |
 | Preloaded example: Church 3 + 2 | Animated step-by-step playback (`Evaluator`) | Server-side evaluation, accounts, saving terms |
 | 3 one-click examples: 3 + 2, identity applied to a term, Ω (to show the timeout) | Showing the de Bruijn form (`parse().deBruijn`) | Contact form, newsletter, analytics or tracking |
-| Readable syntax errors; the page keeps working afterward | Shareable links that encode a term in the URL | Typed lambda calculus or other languages |
-| Bounded runs (1 s timeout) so the page never freezes | Longer runs in a Web Worker | Paid services or a custom domain purchase |
+| Readable errors for syntax and for an invalid max-steps value; the page keeps working afterward | Shareable links that encode a term in the URL | Typed lambda calculus or other languages |
+| Bounded runs: 1 s timeout (the page may freeze for up to ~1.5 s, then accepts input); trace capped at the first and last 100 steps and 50,000 characters | Longer runs in a Web Worker | Paid services or a custom domain purchase |
 | GitHub, LinkedIn, and View source links | Short bio line (if Perrin writes one) | |
-| Works at phone width and with the keyboard | Dark mode / visual polish beyond clean and readable | |
+| Works at phone width and with the keyboard; screen readers hear only the short status line, not the whole trace | Dark mode / visual polish beyond clean and readable | |
 
 ## Five acceptance checks
 
@@ -34,8 +34,8 @@ One page with a heading and three main sections:
 | --- | --- | --- |
 | Purpose | Show the page to someone for about 30 seconds | They can say it's a lambda calculus interpreter they can try, built by Perrin. |
 | Accurate content | Read the page against `project-brief.md` and `ulc/README.md` | Syntax, limits, and links match. BusyReaper isn't mentioned. Nothing is invented. |
-| Main action: real result, not a demo | Press Try the interpreter, then Run on the preloaded example. Then run an invalid term, then Ω, then 3 + 2 again | Focus lands in the box. 3 + 2 gives `λf x.(f (f (f (f (f x)))))` in 6 steps. Invalid input shows the error. Ω stops with status `timeout` and the page stays responsive. The final run still works. The local-only note is visible. |
-| Navigation and keyboard | Follow every link. Tab through the page and press Enter on the button and on Run | GitHub, LinkedIn, and View source open the right pages. Focus is visible, and every control works from the keyboard. |
+| Main action: real result, not a demo | Press Try the interpreter, then Run on the preloaded example. Then run an invalid term, set max steps to `-1`, run Ω, then 3 + 2 again | Focus lands in the box. 3 + 2 gives `λf x.(f (f (f (f (f x)))))` in 6 steps. Invalid input shows the error. `-1` shows "Max steps must be a whole number (0 or more)". Ω stops with status `timeout` after the page freezes for no more than ~1.5 s, then it accepts input again. The final run still works. The local-only note is visible. |
+| Navigation and keyboard | Follow every link. Tab through the page and press Enter on the button and on Run | GitHub, LinkedIn, and View source open the right pages. Focus is visible, and every control works from the keyboard. Only the status line has `aria-live`. |
 | Narrow screen | Narrow the browser to phone width (real phone if available, recorded separately) | Text is readable, long output wraps or scrolls inside its box, and nothing spills sideways. |
 
 **Local testing note:** WebAssembly doesn't load from `file://`, so serve the folder with `python3 -m http.server` and test at `http://localhost:8000/`.
