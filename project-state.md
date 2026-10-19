@@ -1,9 +1,13 @@
 # Project state — Lambda Interpreter Demo
 
 - **Current project, folder, and saved version:** Lambda Interpreter Demo, `lambda-interpreter-web/`. Local git: baseline commit `b583568` ("Initial commit."). Nothing pushed or deployed.
-- **Brief/rules and current stage:** `project-brief.md` written 2026-10-19 (updated with Perrin's answers and LinkedIn URL). Stage: brief, `project-scope.md`, and `project-plan.md` (2026-10-19) done; build increment 1 next. The interpreter is packaged as a WebAssembly library (`ulc/`); no website pages yet.
+- **Brief/rules and current stage:** `project-brief.md` written 2026-10-19 (updated with Perrin's answers and LinkedIn URL). Stage: increments 1 and 2 built in `index.html` (neither committed yet); increment 3 next. Increment 2 changed by Perrin: no jump button or local-only note; sticky menu bar = View source | My other stuff: GitHub · LinkedIn; About section removed. The interpreter is packaged as a WebAssembly library (`ulc/`); no website pages yet.
 - **Completed outcome and files changed (2026-10-19):** Added `ulc/`, a Rust crate made from BusyReaper `src/ulc` (commit `c71450b`) with a JavaScript API (`run`, `parse`, `Evaluator`, `maxDepth`). Prebuilt package in `ulc/pkg/`. Minimal demo page at `ulc/examples/index.html`. Usage and build steps in `ulc/README.md`. BusyReaper itself was not modified.
 - **Checks performed and observations:**
+  - 2026-10-19 increment 1 (`index.html`), headless Chromium on Linux via local HTTP server (Claude's run; not Perrin's browser):
+    - All Passed: text and links present, no "BusyReaper" on the page; 3 + 2 gives `λf x.(f (f (f (f (f x)))))`, 6 steps; `λx.` shows the error in the status line; max steps `-1`, `1.5`, `abc`, `4294967296` are rejected, `2` and `0` give `max_steps`, empty means no limit; identity gives `λy.y` in 1 step.
+    - Ω with every step: `timeout`, 262,614 steps, trace 3,624 chars with hidden-steps line; longest frozen frame 1,139 ms; 3 + 2 works afterward.
+    - Five nested Church 2s: trace capped at 50,050 chars with truncated line. Only `#status` has `aria-live`. `\` becomes `λ`. No console errors. 375 px: no sideways scroll.
   - 2026-10-19 ~14:10: Perrin rebuilt `pkg/` on the Mac with wasm-pack and reports that `cargo test` and the JS tests all passed.
   - `cargo test`: 81 passed (67 original + 14 new).
   - `node --test ulc/js-tests/*.test.mjs` on the built package: 18 passed. Includes the old HTTP server's 3+2 traces, which match exactly.
@@ -13,9 +17,11 @@
     - Over-deep terms stop with a clean error or `"too_deep"`, and the module keeps working afterward.
     - Ω times out on schedule at about 1M steps/s.
     - The package runs inside a module Web Worker.
+  - 2026-10-19 increment 2, headless Chromium (Claude's run): menu sits between the byline and *Try it*, has the six expected links, and stays at the top when scrolled. Try it and How it works links put their headings just below the menu; About is visible but can't reach the top because the page ends there. Examples 3 + 2, Identity, Ω load without running and give the expected results via keyboard (Ω: 207,167 steps, `timeout`). Tab order: menu links → examples → box → max → checkbox → Run. No console errors; 375 px: no sideways scroll, menu wraps to two lines (79 px).
+  - 2026-10-19 menu revision, headless Chromium (Claude's run): menu reads "View source | My other stuff: GitHub LinkedIn" with View source leftmost; About section and all in-page `#` links gone; byline still credits Perrin; Run still gives 6 steps; no console errors; 375 px fine (menu wraps to two lines, 79 px).
 - **Failures and Not tested items:**
   - Not tested in Firefox or Safari, or on a real phone.
   - Not tested on Vercel.
 - **Publication status and actual URL, if any:** Not published.
 - **Pending owner decision or blocker:** None. (Optional bio line later.) Do not mention BusyReaper on the web page (repo mentions are fine). Root `.gitignore` added 2026-10-19.
-- **Next single action and how to verify it:** Perrin runs `sh ulc/build.sh` on the Mac (rebuilds `ulc/pkg/` with home-folder paths remapped to `~`; the script fails if any remain), reruns `cargo test` and `node --test js-tests/*.test.mjs` in `ulc/`, and commits. Then build increment 1 per `project-plan.md`.
+- **Next single action and how to verify it:** Perrin checks increments 1–2 in his browser (`python3 -m http.server 8000` → http://localhost:8000/) and commits. Then increment 3 (phone polish, focus outlines, meta description, `.vercelignore`).

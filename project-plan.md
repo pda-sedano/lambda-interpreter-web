@@ -4,16 +4,16 @@ Builds the agreed `project-scope.md`. Own design, grown from the working `ulc/ex
 
 ## Visitor journey
 
-- **First impression (top of the page):** the name, one line ("An interpreter for the untyped lambda calculus. Try it in your browser."), "by Perrin Alaine-Sedano", and the **Try the interpreter** button.
-- **Task:** press the button, run the preloaded 3 + 2 or click an example, read the result, then optionally scroll to *How it works* and *About*.
+- **First impression (top of the page):** the name, one line ("An interpreter for the untyped lambda calculus. Try it in your browser."), "by Perrin Alaine-Sedano", then the menu bar, with the interpreter directly below.
+- **Task:** press Run on the preloaded 3 + 2 or click an example, read the result, then optionally scroll to *How it works* or use the menu links.
 
 ## Page outline (in order)
 
-1. **Header:** title, one-line description, byline, Try the interpreter button, and small nav (Try it · How it works · About).
-2. **Try it** (`#try`): one-line local-only note; example buttons (3 + 2, Identity, Ω); expression box (preloaded 3 + 2, `\` types `λ`); max-steps field; "Show every step" toggle; Run; a one-line **status** (`aria-live="polite"`: step count and status, or "Error: …"); and the trace box with the steps (not a live region, so screen readers don't read the whole trace).
+1. **Header:** title, one-line description, byline.
+   **Menu bar** (below the header, sticky at the top while scrolling): View source | My other stuff: GitHub · LinkedIn.
+2. **Try it** (`#try`): example buttons (3 + 2, Identity, Ω); expression box (preloaded 3 + 2, `\` types `λ`); max-steps field; "Show every step" toggle; Run; a one-line **status** (`aria-live="polite"`: step count and status, or "Error: …"); and the trace box with the steps (not a live region, so screen readers don't read the whole trace).
 3. **How it works** (`#how`): 3–4 sentences on normal-order reduction and de Bruijn indices; a syntax table; limits (depth 1000, 1-second timeout).
-4. **About** (`#about`): "Built by Perrin Alaine-Sedano" plus GitHub, LinkedIn, and View source links.
-5. **Footer:** "Runs entirely in your browser via WebAssembly."
+4. **Footer:** "Runs entirely in your browser via WebAssembly."
 
 ## Style
 
@@ -44,7 +44,7 @@ Syntax, limits, and wording come from `ulc/README.md`. Links come from `project-
 
 - **Build:** create `index.html` with the header, three sections, footer, and all real text. Move the existing example's working interpreter (Run, `\`→`λ`, max steps, Show every step, error display) into *Try it*, with three changes from the review:
   - **Output cap from the start:** show at most the first 100 and last 100 steps, with a "… N steps hidden …" line, and cut the trace off at 50,000 characters with a "… output truncated …" line. Measured today: Ω with every step returns about 160,000–400,000 steps (several MB of text), and a long typed term can still be about 900 KB after a step-only cap.
-  - **Max-steps check:** the field is a plain text box (`inputmode="numeric"`). Empty means no limit; otherwise it must be a whole number ≥ 0, or the page shows "Max steps must be a whole number (0 or more)" without calling `run`. Today `-1` shows a serde error (`invalid type: floating point '-1.0', expected usize`).
+  - **Max-steps check:** the field is a plain text box (`inputmode="numeric"`). Empty means no limit; otherwise it must be a whole number from 0 to 4,294,967,295 (the interpreter's `usize` limit on wasm32), or the page shows "Max steps must be a whole number from 0 to 4,294,967,295 (or empty for no limit)." without calling `run`. Today `-1` shows a serde error (`invalid type: floating point '-1.0', expected usize`).
   - **Short live status:** `aria-live` goes on the one-line status, not the trace box.
 - **Check:** serve the folder and open `http://localhost:8000/`.
   - The text matches the brief and README, and BusyReaper isn't mentioned.
@@ -57,13 +57,13 @@ Syntax, limits, and wording come from `ulc/README.md`. Links come from `project-
 ### 2. Main action and navigation
 
 - **Build:**
-  - Try the interpreter jumps to `#try` and puts the cursor in the expression box. The nav links reach each section.
+  - Menu bar under the title and subheading, sticky at the top: View source | My other stuff: GitHub · LinkedIn. (Revised by Perrin: no section links; About section removed.)
   - The three example buttons fill the box (they don't run it automatically).
-  - Add the local-only note.
-- **Check:** use only the keyboard. Tab to Try the interpreter, press Enter, and confirm focus lands in the box. Tab to Run and press Enter.
+  - (Dropped by Perrin: the Try the interpreter button and a separate local-only note. The footer note stays.)
+- **Check:** use only the keyboard. Tab reaches the three menu links first, then the example buttons, the box, max steps, the checkbox, and Run; Enter activates each.
   - Each example gives the result in the table above.
   - Ω via its button: frozen for no more than about 1.5 s, then `timeout`, and the page accepts input again.
-  - Each nav link reaches its section.
+  - The menu links point to the right pages.
 - **File:** `index.html`.
 
 ### 3. Usability and finish
@@ -72,7 +72,7 @@ Syntax, limits, and wording come from `ulc/README.md`. Links come from `project-
   - Phone layout: controls wrap, and the output box scrolls inside itself instead of widening the page.
   - Visible focus outlines.
   - A `<title>` and meta description.
-  - Make sure GitHub, LinkedIn, and View source open the right pages.
+  - Make sure View source, GitHub, and LinkedIn open the right pages.
   - Add `.vercelignore` so the deployment serves only `index.html` and `ulc/pkg/` (not the planning notes, `AGENTS.md`, `ulc/src/`, or the READMEs).
 - **Check:** narrow the browser to about 375 px wide.
   - Nothing spills sideways.

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Untyped Lambda Calculus Interpreter</title>
+  <style>
+    :root {
+      --text: #1d1d1f;
+      --muted: #5b5b66;
+      --bg: #fdfdfc;
+      --panel: #f3f3f1;
+      --line: #dcdcd7;
+      --accent: #2b55c6;
+      --error: #b00020;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main, header, footer { max-width: 48rem; margin: 0 auto; padding: 0 1.25rem; }
+    header { padding-top: 3.5rem; padding-bottom: 1.25rem; }
+    .menu {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    .menu-inner {
+      max-width: 48rem; margin: 0 auto; padding: 0.55rem 1.25rem;
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 1.5rem;
+    }
+    .menu ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 1.1rem; }
+    .menu a { text-decoration: none; font-weight: 600; }
+    .menu a:hover { text-decoration: underline; }
+    .menu .other-label { color: var(--muted); }
+    section { scroll-margin-top: 4.5rem; }
+    .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0 0 0.9rem; }
+    .examples span { color: var(--muted); margin-right: 0.15rem; }
+    button.example {
+      font-weight: 500; padding: 0.25rem 0.8rem; background: #fff; color: var(--accent);
+      border: 1px solid var(--line); font-family: var(--mono); font-size: 0.95rem;
+    }
+    button.example:hover { border-color: var(--accent); }
+    h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 0.5rem; }
+    h2 { font-size: 1.4rem; margin: 3rem 0 0.75rem; }
+    .lede { font-size: 1.15rem; margin: 0 0 0.25rem; }
+    .byline { color: var(--muted); margin: 0; }
+    a { color: var(--accent); }
+    code, textarea, input, pre { font-family: var(--mono); font-size: 0.95em; }
+    label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
+    textarea {
+      width: 100%; padding: 0.6rem 0.7rem; border: 1px solid var(--line);
+      border-radius: 6px; background: #fff; color: var(--text); resize: vertical;
+    }
+    .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 0.75rem 1.25rem; margin: 0.9rem 0; }
+    .controls label { margin: 0; }
+    .controls input[type="text"] {
+      display: block; width: 9rem; margin-top: 0.25rem; padding: 0.35rem 0.5rem;
+      border: 1px solid var(--line); border-radius: 6px; background: #fff;
+    }
+    .check { font-weight: normal; display: flex; align-items: center; gap: 0.4rem; }
+    button {
+      font: inherit; font-weight: 600; padding: 0.45rem 1.2rem; border-radius: 6px;
+      border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer;
+    }
+    button:disabled { opacity: 0.55; cursor: progress; }
+    #status { min-height: 1.6em; margin: 0.25rem 0 0.4rem; font-weight: 600; }
+    #status.error { color: var(--error); }
+    #trace {
+      margin: 0; padding: 0.75rem 0.9rem; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere;
+      max-height: 28rem; overflow: auto;
+    }
+    #trace:empty { display: none; }
+    table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
+    th, td { text-align: left; vertical-align: top; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--line); }
+    th { font-size: 0.9rem; color: var(--muted); }
+    td:first-child { white-space: nowrap; }
+    footer { color: var(--muted); font-size: 0.9rem; padding-top: 3rem; padding-bottom: 2.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Untyped Lambda Calculus Interpreter</h1>
+    <p class="lede">An interpreter for the untyped lambda calculus. Try it in your browser.</p>
+    <p class="byline">by Perrin Alaine-Sedano</p>
+  </header>
+
+  <nav class="menu" aria-label="Site">
+    <div class="menu-inner">
+      <ul>
+        <li><a href="https://github.com/pda-sedano/lambda-interpreter-web">View source</a></li>
+      </ul>
+      <ul aria-label="My other stuff">
+        <li class="other-label" aria-hidden="true">My other stuff:</li>
+        <li><a href="https://github.com/pda-sedano">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/perrin-alaine-sedano-4589b31b5/">LinkedIn</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <section id="try" aria-labelledby="try-h">
+      <h2 id="try-h">Try it</h2>
+      <div class="examples" role="group" aria-label="Load an example">
+        <span>Examples:</span>
+        <button type="button" class="example" data-term="λm n f x.(m f (n f x)) λf x.(f (f (f x))) λf x.(f (f x))">3 + 2</button>
+        <button type="button" class="example" data-term="λx.x λy.y">Identity</button>
+        <button type="button" class="example" data-term="λx.(x x) λx.(x x)">Ω</button>
+      </div>
+      <label for="src">Expression <span style="font-weight:normal">(type <code>\</code> for λ)</span></label>
+      <textarea id="src" rows="3" spellcheck="false" autocapitalize="off" autocomplete="off">λm n f x.(m f (n f x)) λf x.(f (f (f x))) λf x.(f (f x))</textarea>
+
+      <div class="controls">
+        <label for="max">Max steps
+          <input id="max" type="text" inputmode="numeric" placeholder="no limit" autocomplete="off">
+        </label>
+        <label class="check"><input id="all" type="checkbox" checked> Show every step</label>
+        <button id="run" type="button" disabled>Run</button>
+      </div>
+
+      <p id="status" aria-live="polite">Loading interpreter…</p>
+      <pre id="trace"></pre>
+    </section>
+
+    <section id="how" aria-labelledby="how-h">
+      <h2 id="how-h">How it works</h2>
+      <p>The interpreter reduces terms in <strong>normal order</strong>: at every step it reduces the leftmost, outermost redex first. That strategy is guaranteed to reach a term's normal form whenever one exists, even when some argument would loop forever if evaluated.</p>
+      <p>Internally, terms are stored with <strong>de Bruijn indices</strong>: each variable is a number counting the binders between it and the <code>λ</code> that binds it. Substitution therefore never captures a variable by accident. Results are printed with your original variable names, adding a scope index such as <code>x^1</code> only where a name is shadowed.</p>
+
+      <h3>Syntax</h3>
+      <table>
+        <thead><tr><th scope="col">Write</th><th scope="col">Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>λx.M</code></td><td>A function with parameter <code>x</code> and body <code>M</code>.</td></tr>
+          <tr><td><code>λx y z.M</code></td><td>Shorthand for <code>λx.λy.λz.M</code>.</td></tr>
+          <tr><td><code>M N</code></td><td>Apply <code>M</code> to <code>N</code>. Application is left associative: <code>f a b</code> means <code>(f a) b</code>.</td></tr>
+          <tr><td><code>( … )</code></td><td>Grouping.</td></tr>
+          <tr><td><code>x^n</code></td><td>The <code>x</code> bound <code>n</code> binders further out than the nearest one: in <code>λx x.x^1</code>, <code>x^1</code> is the outer <code>x</code>.</td></tr>
+        </tbody>
+      </table>
+      <p>A <code>λ</code> body is a single term, so <code>λx.x y</code> means <code>(λx.x) y</code>; write <code>λx.(x y)</code> to apply <code>x</code> to <code>y</code>. A variable name can be any run of characters except whitespace and <code>λ . ( ) ^</code>.</p>
+
+      <h3>Limits</h3>
+      <ul>
+        <li>Each run stops after <strong>1 second</strong> (status <code>timeout</code>), or earlier at the max-steps limit if you set one.</li>
+        <li>Terms nested more than <strong>1000 levels</strong> deep are refused (status <code>too_deep</code> if a reduction would get there).</li>
+        <li>Long traces show the first and last 100 steps.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Runs entirely in your browser via WebAssembly.</p>
+  </footer>
+
+  <script type="module">
+    import init, { run } from "./ulc/pkg/ulc.js";
+
+    const $ = (id) => document.getElementById(id);
+    const src = $("src"), max = $("max"), all = $("all"), runBtn = $("run");
+    const status = $("status"), trace = $("trace");
+
+    const SHOW_EACH_END = 100;     // steps shown at the start and at the end of a long trace
+    const MAX_CHARS = 50000;       // hard limit on trace text
+    const MAX_STEPS_LIMIT = 4294967295; // largest value the interpreter accepts
+
+    function setStatus(text, isError = false) {
+      status.textContent = text;
+      status.classList.toggle("error", isError);
+    }
+
+    try {
+      await init();
+    } catch (e) {
+      setStatus("Error: the interpreter could not be loaded. Please reload the page.", true);
+      throw e;
+    }
+    setStatus("");
+    runBtn.disabled = false;
+
+    // Example buttons load a term into the box (they don't run it).
+    for (const btn of document.querySelectorAll("button.example")) {
+      btn.addEventListener("click", () => {
+        src.value = btn.dataset.term;
+        trace.textContent = "";
+        setStatus("");
+      });
+    }
+
+    // Typing a backslash inserts λ.
+    src.addEventListener("input", () => {
+      const pos = src.selectionStart;
+      if (src.value.includes("\\")) {
+        src.value = src.value.replaceAll("\\", "λ");
+        src.setSelectionRange(pos, pos);
+      }
+    });
+
+    function readMaxSteps() {
+      const v = max.value.trim();
+      if (v === "") return { ok: true, value: undefined };
+      if (!/^\d+$/.test(v)) return { ok: false };
+      const n = Number(v);
+      return n <= MAX_STEPS_LIMIT ? { ok: true, value: n } : { ok: false };
+    }
+
+    function formatTrace(steps) {
+      let lines = steps;
+      if (steps.length > 2 * SHOW_EACH_END) {
+        const hidden = steps.length - 2 * SHOW_EACH_END;
+        lines = [
+          ...steps.slice(0, SHOW_EACH_END),
+          `… ${hidden.toLocaleString("en-US")} steps hidden …`,
+          ...steps.slice(-SHOW_EACH_END),
+        ];
+      }
+      let text = lines.join("\n");
+      if (text.length > MAX_CHARS) {
+        // Keep the beginning and the end (the final result) visible.
+        const half = MAX_CHARS / 2;
+        const cut = text.length - MAX_CHARS;
+        text = text.slice(0, half) +
+          `\n… output truncated (${cut.toLocaleString("en-US")} characters hidden) …\n` +
+          text.slice(-half);
+      }
+      return text;
+    }
+
+    const STATUS_TEXT = {
+      normal_form: "fully reduced",
+      max_steps: "stopped at the max-steps limit",
+      timeout: "stopped after 1 second",
+      too_deep: "stopped: the term would be nested more than 1000 levels deep",
+    };
+
+    // Let the browser paint "Running…" before the (blocking) run starts.
+    const nextPaint = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    runBtn.addEventListener("click", async () => {
+      const m = readMaxSteps();
+      if (!m.ok) {
+        trace.textContent = "";
+        setStatus("Max steps must be a whole number from 0 to 4,294,967,295 (or empty for no limit).", true);
+        return;
+      }
+      runBtn.disabled = true;
+      setStatus("Running…");
+      trace.textContent = "";
+      await nextPaint();
+      try {
+        const r = run(src.value, { outputAll: all.checked, maxSteps: m.value, timeoutMs: 1000 });
+        trace.textContent = formatTrace(r.steps);
+        const n = r.stepCount.toLocaleString("en-US");
+        setStatus(`${n} ${r.stepCount === 1 ? "step" : "steps"} · status: ${r.status} (${STATUS_TEXT[r.status] ?? r.status})`);
+      } catch (e) {
+        const msg = String(e.message ?? e);
+        setStatus(msg.startsWith("Error") ? msg : `Error: ${msg}`, true);
+      } finally {
+        runBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
