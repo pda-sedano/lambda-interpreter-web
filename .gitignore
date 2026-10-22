@@ -38,3 +38,10 @@ npm-debug.log*
 
 # NOTE: ulc/pkg/ is committed on purpose so Vercel needs no Rust toolchain.
 # Do not add pkg/ here, and delete pkg/.gitignore after each wasm-pack build.
+
+# Project planning and agent instruction files (kept local)
+AGENTS.md
+project-brief.md
+project-plan.md
+project-scope.md
+project-state.md
