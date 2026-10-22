@@ -3,17 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Untyped Lambda Calculus Interpreter</title>
+  <title>λ</title>
+  <script>
+    // Apply a saved theme choice before the page draws, so it doesn't flash.
+    try {
+      const t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch {}
+  </script>
   <style>
     :root {
+      color-scheme: light;
       --text: #1d1d1f;
       --muted: #5b5b66;
       --bg: #fdfdfc;
       --panel: #f3f3f1;
+      --field: #fff;
       --line: #dcdcd7;
       --accent: #2b55c6;
+      --on-accent: #fff;
       --error: #b00020;
+      --silver: #8a8d93;
       --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    /* Dark colors: used when the system prefers dark (unless light was chosen), or when dark was chosen. */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --text: #e6e6e9; --muted: #a0a0ab; --bg: #16171a; --panel: #1f2024; --field: #111215;
+        --line: #34353b; --accent: #8aa8ff; --on-accent: #0d1220; --error: #ff7a8a; --silver: #b4b7be;
+      }
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --text: #e6e6e9; --muted: #a0a0ab; --bg: #16171a; --panel: #1f2024; --field: #111215;
+      --line: #34353b; --accent: #8aa8ff; --on-accent: #0d1220; --error: #ff7a8a; --silver: #b4b7be;
     }
     * { box-sizing: border-box; }
     body {
@@ -36,15 +60,20 @@
     .menu a { text-decoration: none; font-weight: 600; }
     .menu a:hover { text-decoration: underline; }
     .menu .other-label { color: var(--muted); }
+    .menu button.theme-toggle {
+      padding: 0; border: 0; background: none; color: var(--accent); font-weight: 600;
+    }
+    .menu button.theme-toggle:hover { text-decoration: underline; }
     section { scroll-margin-top: 4.5rem; }
     .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0 0 0.9rem; }
     .examples span { color: var(--muted); margin-right: 0.15rem; }
     button.example {
-      font-weight: 500; padding: 0.25rem 0.8rem; background: #fff; color: var(--accent);
+      font-weight: 500; padding: 0.25rem 0.8rem; background: var(--field); color: var(--accent);
       border: 1px solid var(--line); font-family: var(--mono); font-size: 0.95rem;
     }
     button.example:hover { border-color: var(--accent); }
     h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 0.5rem; }
+    header h1 { font-size: 5rem; line-height: 1; color: var(--silver); }
     h2 { font-size: 1.4rem; margin: 3rem 0 0.75rem; }
     .lede { font-size: 1.15rem; margin: 0 0 0.25rem; }
     .byline { color: var(--muted); margin: 0; }
@@ -53,18 +82,18 @@
     label { display: block; font-weight: 600; margin-bottom: 0.35rem; }
     textarea {
       width: 100%; padding: 0.6rem 0.7rem; border: 1px solid var(--line);
-      border-radius: 6px; background: #fff; color: var(--text); resize: vertical;
+      border-radius: 6px; background: var(--field); color: var(--text); resize: vertical;
     }
     .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 0.75rem 1.25rem; margin: 0.9rem 0; }
     .controls label { margin: 0; }
     .controls input[type="text"] {
       display: block; width: 9rem; margin-top: 0.25rem; padding: 0.35rem 0.5rem;
-      border: 1px solid var(--line); border-radius: 6px; background: #fff;
+      border: 1px solid var(--line); border-radius: 6px; background: var(--field); color: var(--text);
     }
     .check { font-weight: normal; display: flex; align-items: center; gap: 0.4rem; }
     button {
       font: inherit; font-weight: 600; padding: 0.45rem 1.2rem; border-radius: 6px;
-      border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer;
+      border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); cursor: pointer;
     }
     button:disabled { opacity: 0.55; cursor: progress; }
     #status { min-height: 1.6em; margin: 0.25rem 0 0.4rem; font-weight: 600; }
@@ -84,8 +113,8 @@
 </head>
 <body>
   <header>
-    <h1>Untyped Lambda Calculus Interpreter</h1>
-    <p class="lede">An interpreter for the untyped lambda calculus. Try it in your browser.</p>
+    <h1>λ</h1>
+    <p class="lede">An interpreter for the untyped lambda calculus.</p>
     <p class="byline">by Perrin Alaine-Sedano</p>
   </header>
 
@@ -93,6 +122,7 @@
     <div class="menu-inner">
       <ul>
         <li><a href="https://github.com/pda-sedano/lambda-interpreter-web">View source</a></li>
+        <li><button type="button" class="theme-toggle" id="theme-toggle">Dark mode</button></li>
       </ul>
       <ul aria-label="My other stuff">
         <li class="other-label" aria-hidden="true">My other stuff:</li>
@@ -156,6 +186,29 @@
   <footer>
     <p>Runs entirely in your browser via WebAssembly.</p>
   </footer>
+
+  <script>
+    // Light/dark toggle. Kept separate from the interpreter script so it works even if that fails to load.
+    (() => {
+      const btn = document.getElementById("theme-toggle");
+      const root = document.documentElement;
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+      const isDark = () => (root.dataset.theme ?? (systemDark.matches ? "dark" : "light")) === "dark";
+      const update = () => {
+        const dark = isDark();
+        btn.textContent = dark ? "Light mode" : "Dark mode";
+        btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      };
+      btn.addEventListener("click", () => {
+        const next = isDark() ? "light" : "dark";
+        root.dataset.theme = next;
+        try { localStorage.setItem("theme", next); } catch {}
+        update();
+      });
+      systemDark.addEventListener("change", update);
+      update();
+    })();
+  </script>
 
   <script type="module">
     import init, { run } from "./ulc/pkg/ulc.js";
